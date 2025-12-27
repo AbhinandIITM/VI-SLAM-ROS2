@@ -1,0 +1,18 @@
+%YAML:1.0
+---
+model_type: PINHOLE
+camera_name: camera
+image_width: 640
+image_height: 480
+distortion_parameters:
+   k1: 0.0
+   k2: 0.0
+   p1: 0.0
+   p2: 0.0
+projection_parameters:
+   # fx, fy = width / (2 * tan(HFov / 2))
+   # 640 / (2 * tan(1.39626 / 2)) = ~381.36
+   fx: 381.36
+   fy: 381.36
+   cx: 320.0
+   cy: 240.0

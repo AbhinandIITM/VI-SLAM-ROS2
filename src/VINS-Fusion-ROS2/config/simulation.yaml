@@ -1,0 +1,64 @@
+%YAML:1.0
+
+# --- Topic Configuration ---
+# VINS-Fusion requires 'image0_topic', NOT 'image_topic'
+imu_topic: "/apriltag_slam/imu/data_raw"
+image0_topic: "/apriltag_slam/camera/image_raw"
+output_path: "/home/abhinand/output/"
+
+# --- Feature Tracker Config ---
+# Enable IMU (1 = Yes, 0 = No)
+imu: 1
+# Camera Count (1 = Mono, 2 = Stereo)
+num_of_cam: 1 
+
+# --- Camera Calibration ---
+cam0_calib: "cam0.yaml"
+# Ensure cam0.yaml is in the same folder
+
+# --- Extrinsics (Camera to IMU) ---
+# 0: Trust the "body_T_cam0" parameters below (Best for Sim).
+# 1: Estimate extrinsic parameters online (Best for Real World).
+estimate_extrinsic: 0
+
+# Rotation from Camera Frame to IMU Frame
+# This matrix assumes:
+# 1. Camera is mounted pointing FORWARD (X-axis in Gazebo, Z-axis in OpenCV)
+# 2. Camera is roughly 0.375m forward and 0.125m up from the IMU
+# 3. Standard ROS frames: Body (X=Fwd, Y=Left, Z=Up), Cam (Z=Fwd, X=Right, Y=Down)
+body_T_cam0: !!opencv-matrix
+   rows: 4
+   cols: 4
+   dt: d
+   data: [0, 0, 1, 0.375,
+          -1, 0, 0, 0, 
+          0, -1, 0, 0.125,
+          0, 0, 0, 1]
+
+# --- Optimization Config ---
+multiple_thread: 1
+max_cnt: 250            # Increased feature count for stability
+min_dist: 20            # Minimum distance between features
+freq: 10                # Frequency to output pose (Hz)
+F_threshold: 1.0        # RANSAC threshold (px)
+show_track: 1           # Publish tracking image to topic
+flow_back: 1            # Optical flow cross-check
+
+# --- IMU Noise Parameters (Tuned for Gazebo Simulation) ---
+# Sim sensors are cleaner than real ones. 
+# If these are too high, VINS trusts visual data too little.
+acc_n: 0.01          # Accelerometer noise density
+gyr_n: 0.001         # Gyroscope noise density
+acc_w: 0.0001        # Accelerometer random walk
+gyr_w: 0.00001       # Gyroscope random walk
+g_norm: 9.81         # Standard Gazebo gravity
+
+# --- Time Synchronization ---
+# In simulation, there is NO time offset between sensors.
+estimate_td: 0
+td: 0.0
+
+# --- Loop Closure Config ---
+load_previous_pose_graph: 0
+pose_graph_save_path: "/home/abhinand/output/pose_graph/"
+save_image: 0
