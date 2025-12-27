@@ -1,0 +1,205 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="apriltag_torso_bot">
+
+  <xacro:arg name="config_file" default=""/>
+
+  <material name="black"><color rgba="0 0 0 1"/></material>
+  <material name="blue"><color rgba="0 0 1 1"/></material>
+  <material name="green"><color rgba="0 1 0 1"/></material>
+
+  <xacro:property name="base_length" value="0.75"/>
+  <xacro:property name="base_width"  value="0.5"/>
+  <xacro:property name="base_height" value="0.25"/>
+  <xacro:property name="base_mass"   value="31.25"/>
+
+  <xacro:property name="wheel_radius" value="0.125"/>
+  <xacro:property name="wheel_width"  value="0.05"/>
+  <xacro:property name="wheel_mass"   value="3.1"/>
+
+  <xacro:property name="wheelbase" value="0.6"/>
+  <xacro:property name="track"     value="0.6"/>
+
+  <xacro:property name="cam_size" value="0.125"/>
+
+  <xacro:macro name="box_inertia" params="m x y z">
+    <inertial>
+      <mass value="${m}"/>
+      <inertia ixx="${m*(y*y+z*z)/12}" ixy="0" ixz="0"
+               iyy="${m*(x*x+z*z)/12}" iyz="0"
+               izz="${m*(x*x+y*y)/12}"/>
+    </inertial>
+  </xacro:macro>
+
+  <xacro:macro name="cylinder_inertia" params="m r h">
+    <inertial>
+      <mass value="${m}"/>
+      <inertia ixx="${m*(3*r*r+h*h)/12}" ixy="0" ixz="0"
+               iyy="${m*(3*r*r+h*h)/12}" iyz="0"
+               izz="${m*r*r/2}"/>
+    </inertial>
+  </xacro:macro>
+
+  <link name="base_footprint"/>
+
+  <joint name="base_joint" type="fixed">
+    <parent link="base_footprint"/>
+    <child link="base_link"/>
+    <origin xyz="0 0 ${wheel_radius + base_height/2}" rpy="0 0 0"/>
+  </joint>
+
+  <link name="base_link">
+    <xacro:box_inertia m="${base_mass}" x="${base_length}" y="${base_width}" z="${base_height}"/>
+    <visual>
+      <geometry><box size="${base_length} ${base_width} ${base_height}"/></geometry>
+      <material name="blue"/>
+    </visual>
+    <collision>
+      <geometry><box size="${base_length} ${base_width} ${base_height}"/></geometry>
+    </collision>
+  </link>
+
+  <xacro:macro name="rear_wheel" params="prefix y_offset">
+    <link name="${prefix}_wheel_link">
+      <xacro:cylinder_inertia m="${wheel_mass}" r="${wheel_radius}" h="${wheel_width}"/>
+      <visual>
+        <geometry><cylinder radius="${wheel_radius}" length="${wheel_width}"/></geometry>
+        <material name="black"/>
+      </visual>
+      <collision>
+        <geometry><cylinder radius="${wheel_radius}" length="${wheel_width}"/></geometry>
+      </collision>
+    </link>
+    <joint name="${prefix}_wheel_joint" type="continuous">
+      <parent link="base_link"/>
+      <child link="${prefix}_wheel_link"/>
+      <origin xyz="${-wheelbase/2} ${y_offset} ${-base_height/2}" rpy="${-pi/2} 0 0"/>
+      <axis xyz="0 0 1"/>
+    </joint>
+  </xacro:macro>
+
+  <xacro:rear_wheel prefix="rear_left"  y_offset="${track/2}"/>
+  <xacro:rear_wheel prefix="rear_right" y_offset="${-track/2}"/>
+
+  <xacro:macro name="front_wheel" params="prefix y_offset">
+    <link name="${prefix}_steer_link">
+      <inertial>
+        <mass value="0.1"/>
+        <inertia ixx="0.01" ixy="0" ixz="0" iyy="0.01" iyz="0" izz="0.01"/>
+      </inertial>
+    </link>
+    <joint name="${prefix}_steer_joint" type="revolute">
+      <parent link="base_link"/>
+      <child link="${prefix}_steer_link"/>
+      <origin xyz="${wheelbase/2} ${y_offset} ${-base_height/2}" rpy="0 0 0"/>
+      <axis xyz="0 0 1"/>
+      <limit lower="-0.6" upper="0.6" effort="1000" velocity="100"/>
+    </joint>
+
+    <link name="${prefix}_wheel_link">
+      <xacro:cylinder_inertia m="${wheel_mass}" r="${wheel_radius}" h="${wheel_width}"/>
+      <visual>
+        <geometry><cylinder radius="${wheel_radius}" length="${wheel_width}"/></geometry>
+        <material name="black"/>
+      </visual>
+      <collision>
+        <geometry><cylinder radius="${wheel_radius}" length="${wheel_width}"/></geometry>
+      </collision>
+    </link>
+    <joint name="${prefix}_wheel_joint" type="continuous">
+      <parent link="${prefix}_steer_link"/>
+      <child link="${prefix}_wheel_link"/>
+      <origin xyz="0 0 0" rpy="${-pi/2} 0 0"/>
+      <axis xyz="0 0 1"/>
+    </joint>
+  </xacro:macro>
+
+  <xacro:front_wheel prefix="front_left"  y_offset="${track/2}"/>
+  <xacro:front_wheel prefix="front_right" y_offset="${-track/2}"/>
+
+  <link name="camera_link">
+    <visual>
+      <geometry><box size="${cam_size} ${cam_size} ${cam_size}"/></geometry>
+      <material name="green"/>
+    </visual>
+  </link>
+  <joint name="camera_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="camera_link"/>
+    <origin xyz="${base_length/2} 0 ${base_height/2 + cam_size/2}"/>
+  </joint>
+  <link name="camera_optical_frame"/>
+  <joint name="camera_optical_joint" type="fixed">
+    <parent link="camera_link"/>
+    <child link="camera_optical_frame"/>
+    <origin xyz="0 0 0" rpy="${-pi/2} 0 ${-pi/2}"/>
+  </joint>
+
+  <link name="imu_link"/>
+  <joint name="imu_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="imu_link"/>
+    <origin xyz="0 0 0"/>
+  </joint>
+
+  <ros2_control name="AckermannSystem" type="system">
+    <hardware>
+      <plugin>gazebo_ros2_control/GazeboSystem</plugin>
+    </hardware>
+
+    <joint name="front_left_steer_joint">
+      <command_interface name="position"/>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+    <joint name="front_right_steer_joint">
+      <command_interface name="position"/>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+
+    <joint name="rear_left_wheel_joint">
+      <command_interface name="velocity"/>
+      <state_interface name="velocity"/>
+      <state_interface name="position"/>
+    </joint>
+    <joint name="rear_right_wheel_joint">
+      <command_interface name="velocity"/>
+      <state_interface name="velocity"/>
+      <state_interface name="position"/>
+    </joint>
+
+    <joint name="front_left_wheel_joint">
+      <state_interface name="velocity"/>
+      <state_interface name="position"/>
+    </joint>
+    <joint name="front_right_wheel_joint">
+      <state_interface name="velocity"/>
+      <state_interface name="position"/>
+    </joint>
+  </ros2_control>
+
+  <gazebo>
+    <plugin name="gazebo_ros2_control" filename="libgazebo_ros2_control.so">
+      <parameters>$(arg config_file)</parameters>
+    </plugin>
+  </gazebo>
+
+  <gazebo reference="camera_link">
+    <sensor name="camera" type="camera">
+      <always_on>true</always_on><update_rate>30.0</update_rate>
+      <camera><horizontal_fov>1.396</horizontal_fov><image><width>640</width><height>480</height><format>R8G8B8</format></image><clip><near>0.02</near><far>50.0</far></clip></camera>
+      <plugin name="camera_controller" filename="libgazebo_ros_camera.so">
+        <frame_name>camera_optical_frame</frame_name>
+      </plugin>
+    </sensor>
+  </gazebo>
+
+  <gazebo reference="imu_link">
+    <sensor name="imu_sensor" type="imu">
+      <plugin filename="libgazebo_ros_imu_sensor.so" name="imu_plugin">
+        <ros><namespace>/apriltag_slam/imu</namespace><remapping>~/out:=data_raw</remapping></ros>
+      </plugin>
+      <always_on>true</always_on><update_rate>100</update_rate>
+    </sensor>
+  </gazebo>
+</robot>

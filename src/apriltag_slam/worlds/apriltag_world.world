@@ -1,0 +1,87 @@
+<?xml version="1.0"?>
+<sdf version="1.4">
+  <world name="apriltag_world">
+    
+    <plugin name="gazebo_ros_state" filename="libgazebo_ros_state.so">
+      <ros>
+        <namespace>/</namespace>
+      </ros>
+      <update_rate>50.0</update_rate>
+    </plugin>
+
+    <include>
+      <uri>model://asphalt_plane</uri>
+    </include>
+
+    <include>
+      <uri>model://sun</uri>
+    </include>
+
+    <physics type="ode">
+      <max_step_size>0.001</max_step_size>
+      <real_time_factor>1</real_time_factor>
+      <real_time_update_rate>1000</real_time_update_rate>
+    </physics>
+
+    <include>
+      <uri>model://apriltag_0</uri>
+      <pose>1.5 0.0 0.4 0 0 1.5708</pose>
+      <name>apriltag_0</name>
+    </include>
+
+    <include>
+      <uri>model://apriltag_1</uri>
+      <pose>0.5 1.2 0.4 0 0 1.5708</pose>
+      <name>apriltag_1</name>
+    </include>
+
+    <include>
+      <uri>model://apriltag_2</uri>
+      <pose>-1.2 0.0 0.4 0 0 1.5708</pose>
+      <name>apriltag_2</name>
+    </include>
+
+    <include>
+      <uri>model://construction_cone</uri>
+      <pose>0.8 -1.0 0 0 0 0</pose>
+      <name>cone_1</name>
+    </include>
+
+    <include>
+      <uri>model://construction_cone</uri>
+      <pose>2.0 0.5 0 0 0 0</pose>
+      <name>cone_2</name>
+    </include>
+
+    <include>
+      <uri>model://construction_cone</uri>
+      <pose>-0.5 1.8 0 0 0 0</pose>
+      <name>cone_3</name>
+    </include>
+
+    <include>
+      <uri>model://cardboard_box</uri>
+      <pose>-1.0 -1.5 0.15 0 0 0.5</pose>
+      <name>box_1</name>
+    </include>
+
+    <include>
+      <uri>model://cardboard_box</uri>
+      <pose>1.8 1.5 0.15 0 0 -0.4</pose>
+      <name>box_2</name>
+    </include>
+
+    <include>
+      <uri>model://jersey_barrier</uri>
+      <pose>3.0 0.0 0 0 0 1.57</pose>
+      <name>barrier_1</name>
+    </include>
+
+    <include>
+      <uri>model://dumpster</uri>
+      <pose>-2.5 1.0 0 0 0 0</pose>
+      <name>dumpster_1</name>
+    </include>
+
+  </world>
+</sdf>
