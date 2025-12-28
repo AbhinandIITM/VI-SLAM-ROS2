@@ -21,7 +21,7 @@ def generate_launch_description():
     
     gazebo = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(os.path.join(gazebo_ros_share, 'launch', 'gazebo.launch.py')),
-        launch_arguments={'world': world_file}.items()
+        launch_arguments={'world': world_file,'extra_gazebo_args': '--ros-args --log-level error'}.items()
     )
 
     node_robot_state_publisher = Node(
@@ -95,14 +95,15 @@ def generate_launch_description():
     )
 
     return LaunchDescription([
+        static_tf,
         gazebo,
         node_robot_state_publisher,
         spawn_entity,
         load_joint_state_broadcaster,
         load_ackermann_controller,
-        twist_stamper,
+        #twist_stamper,
         #torso_stabilizer,
         #random_tag_mover,
         # rviz_node,
-        # static_tf
+        
     ])
