@@ -11,10 +11,12 @@ def generate_launch_description():
     pkg_share = get_package_share_directory('apriltag_slam')
     gazebo_ros_share = get_package_share_directory('gazebo_ros')
     
-    xacro_file = os.path.join(pkg_share, 'urdf', 'robot.urdf.xacro')
+    # xacro_file = os.path.join(pkg_share, 'urdf', 'robot.urdf.xacro')
+    xacro_file = os.path.join(pkg_share, 'urdf', 'robot_effort.urdf.xacro')
     world_file = os.path.join(pkg_share, 'worlds', 'model_world.world')
     rviz_config = os.path.join(pkg_share, 'config', 'view_slam.rviz')
-    ctrl_yaml = os.path.join(pkg_share, 'config', 'ackermann.yaml')
+    #ctrl_yaml = os.path.join(pkg_share, 'config', 'ackermann.yaml')
+    ctrl_yaml = os.path.join(pkg_share, 'config', 'effort.yaml')
     
     robot_description_config = xacro.process_file(xacro_file, mappings={'config_file': ctrl_yaml})
     robot_description = {'robot_description': robot_description_config.toxml()}
@@ -45,12 +47,27 @@ def generate_launch_description():
         output="screen",
     )
 
-    load_ackermann_controller = Node(
+    load_steering_controller = Node(
         package="controller_manager",
         executable="spawner",
-        arguments=["ackermann_steering_controller", "--controller-manager", "/controller_manager"],
+        arguments=["steering_controller", "--controller-manager", "/controller_manager"],
         output="screen",
     )
+
+    load_drive_controller = Node(
+        package="controller_manager",
+        executable="spawner",
+        arguments=["drive_controller", "--controller-manager", "/controller_manager"],
+        output="screen",
+    )
+
+    load_imu_broadcaster = Node(
+        package="controller_manager",
+        executable="spawner",
+        arguments=["imu_broadcaster", "--controller-manager", "/controller_manager"],
+        output="screen",
+    )
+
 
     # Twist Stamper to convert /cmd_vel -> /ackermann.../reference
     twist_stamper = Node(
@@ -100,7 +117,9 @@ def generate_launch_description():
         node_robot_state_publisher,
         spawn_entity,
         load_joint_state_broadcaster,
-        load_ackermann_controller,
+        load_steering_controller,
+        load_drive_controller,
+        load_imu_broadcaster,
         #twist_stamper,
         #torso_stabilizer,
         #random_tag_mover,

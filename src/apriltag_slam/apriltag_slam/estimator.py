@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-
 import rclpy
 from rclpy.node import Node
 from sensor_msgs.msg import Imu, Image, CameraInfo
@@ -77,7 +76,7 @@ class VisualOdometer:
             
         return R_vo, t_vo, valid
 
-class TorsoSLAMNode(Node):
+class SLAMNode(Node):
     def __init__(self):
         super().__init__('torso_slam_node')
         
@@ -257,7 +256,7 @@ class TorsoSLAMNode(Node):
 
 def main():
     rclpy.init()
-    node = TorsoSLAMNode()
+    node = SLAMNode()
     rclpy.spin(node)
     node.destroy_node()
     rclpy.shutdown()

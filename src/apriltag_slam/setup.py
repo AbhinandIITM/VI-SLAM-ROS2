@@ -32,8 +32,7 @@ setup(
     entry_points={
         'console_scripts': [
             # Note the dot notation: package.module:function
-            'torso_estimator = apriltag_slam.torso_estimator_node:main',
-            'torso_stabilizer = apriltag_slam.torso_stabilizer_node:main',
+            'estimator = apriltag_slam.estimator:main',
             'random_tag_mover = apriltag_slam.random_tag_mover:main',
         ],
     },
