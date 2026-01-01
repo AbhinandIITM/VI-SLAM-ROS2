@@ -47,9 +47,9 @@ class TeleopNode(Node):
         self.steering_angle = 0.0
         
         # Limits / Steps
-        self.TORQUE_STEP = 0.8
-        self.MAX_TORQUE = 20.0
-        self.STEER_STEP = 0.3
+        self.TORQUE_STEP = 0.5
+        self.MAX_TORQUE = 5.0
+        self.STEER_STEP = 0.1
         self.MAX_STEER = 0.8 # radians (~45 degrees)
 
     def getKey(self):
@@ -96,6 +96,7 @@ class TeleopNode(Node):
                     self.steering_angle -= self.STEER_STEP
                 elif key == 's':
                     self.torque = 0.0
+                    self.steering_angle = 0.0
                 elif key == ' ':
                     self.steering_angle = 0.0
                 elif key == '\x03': # CTRL-C

@@ -105,7 +105,7 @@ class SLAMNode(Node):
         self.last_imu_time = None
 
         # --- Subscribers ---
-        self.create_subscription(Imu, '/apriltag_slam/imu/data_raw', self.imu_callback, 10)
+        self.create_subscription(Imu, '/imu_broadcaster/imu', self.imu_callback, 10)
         self.create_subscription(CameraInfo, '/apriltag_slam/camera/camera_info', self.info_callback, 10)
         self.create_subscription(Image, '/apriltag_slam/camera/image_raw', self.image_callback, 10)
         

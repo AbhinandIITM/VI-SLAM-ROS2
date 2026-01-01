@@ -2,7 +2,7 @@
 
 # --- Topic Configuration ---
 # VINS-Fusion requires 'image0_topic', NOT 'image_topic'
-imu_topic: "/imu_broadcaster/imu"
+imu_topic: "/apriltag_slam/imu/data_raw"
 image0_topic: "/apriltag_slam/camera/image_raw"
 output_path: "/home/abhinand/Bionex-lab/slaw_ws/output/"
 
@@ -31,8 +31,8 @@ body_T_cam0: !!opencv-matrix
    cols: 4
    dt: d
    data: [0, 0, 1, 0.375,
-          -1, 0, 0, 0, 
-          0, -1, 0, 0.125,
+         -1, 0, 0, 0,
+          0, -1, 0, 0.1875,
           0, 0, 0, 1]
 
 # --- Optimization Config ---
@@ -47,8 +47,8 @@ flow_back: 1            # Optical flow cross-check
 # --- IMU Noise Parameters (Tuned for Gazebo Simulation) ---
 # Sim sensors are cleaner than real ones. 
 # If these are too high, VINS trusts visual data too little.
-acc_n: 0.01          # Accelerometer noise density
-gyr_n: 0.001         # Gyroscope noise density
+acc_n: 0.005 
+gyr_n: 0.001
 acc_w: 0.0001        # Accelerometer random walk
 gyr_w: 0.00001       # Gyroscope random walk
 g_norm: 9.81         # Standard Gazebo gravity

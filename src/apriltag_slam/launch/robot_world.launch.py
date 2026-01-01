@@ -14,7 +14,7 @@ def generate_launch_description():
     gazebo_ros_share = get_package_share_directory('gazebo_ros')
 
     xacro_file = os.path.join(pkg_share, 'urdf', 'robot_effort.urdf.xacro')
-    world_file = os.path.join(pkg_share, 'worlds', 'model_world.world')
+    world_file = os.path.join(pkg_share, 'worlds', 'model_world_new.world')
     rviz_config = os.path.join(pkg_share, 'config', 'view_slam.rviz')
     ctrl_yaml = os.path.join(pkg_share, 'config', 'effort.yaml')
 
@@ -36,8 +36,8 @@ def generate_launch_description():
     spawn_entity = Node(
         package='gazebo_ros',
         executable='spawn_entity.py',
-        arguments=['-topic', 'robot_description', '-entity', 'my_bot'],
-        output='screen'
+        arguments=['-topic', 'robot_description', '-entity', 'my_bot', '-x', '0', '-y', '0', '-z', '0.1','-timeout','90'],
+        output='screen' 
     )
 
     load_joint_state_broadcaster = Node(
@@ -75,10 +75,10 @@ def generate_launch_description():
         arguments=['0', '0', '0', '0', '0', '0', 'world', 'odom'],
         output='screen'
     )
-    torso_stabilizer = Node(
+    state_estimator = Node(
         package='apriltag_slam',
-        executable='torso_stabilizer',
-        name='torso_stabilizer',
+        executable='estimator',
+        name='state_estimator',
         output='screen',
         parameters=[{'tag_size': 0.15}]
     )
@@ -91,32 +91,50 @@ def generate_launch_description():
     )
 
     rviz_node = Node(
-        package='rviz2',
-        executable='rviz2',
-        name='rviz2',
-        arguments=['-d', rviz_config],
+    package='rviz2',
+    executable='rviz2',
+    name='rviz2',
+    arguments=['-d', rviz_config],
+    parameters=[{'use_sim_time': True}], # Add this
+    output='screen'
+    )
+
+    ground_truth_tf_publisher = Node(
+        package='apriltag_slam',
+        executable='ground_truth_broadcaster',
+        name='ground_truth_tf_publisher',
+        parameters=[{'use_sim_time': True}], # Add this
         output='screen'
     )
-    # Event Handler: Wait for spawn_entity to finish, THEN load controllers SEQUENTIALLY
+
+    
+   
     load_controllers_after_spawn = RegisterEventHandler(
         event_handler=OnProcessExit(
-            target_action=spawn_entity,
+            target_action=node_robot_state_publisher,
             on_exit=[
                 load_joint_state_broadcaster,
                 load_drive_controller,
                 load_steering_controller,
                 load_imu_broadcaster,
-                torso_stabilizer,
-                #random_tag_mover,
-                 rviz_node,
+                rviz_node,
+                state_estimator,
+                # random_tag_mover,
             ]
         )
     )
 
     return LaunchDescription([
-        static_tf,
+        #static_tf,
+        ground_truth_tf_publisher,
         gazebo,
         node_robot_state_publisher,
-        spawn_entity,
-        load_controllers_after_spawn,
+        # spawn_entity,
+        load_joint_state_broadcaster,
+        load_drive_controller,
+        load_steering_controller,
+        load_imu_broadcaster,
+        rviz_node,
+        #load_controllers_after_spawn,
+        
     ])

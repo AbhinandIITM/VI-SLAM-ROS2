@@ -34,6 +34,7 @@ setup(
             # Note the dot notation: package.module:function
             'estimator = apriltag_slam.estimator:main',
             'random_tag_mover = apriltag_slam.random_tag_mover:main',
+            'ground_truth_broadcaster = apriltag_slam.ground_truth_broadcaster:main'
         ],
     },
 )

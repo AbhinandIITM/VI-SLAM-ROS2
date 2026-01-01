@@ -12,11 +12,11 @@ def generate_launch_description():
     gazebo_ros_share = get_package_share_directory('gazebo_ros')
     
     # xacro_file = os.path.join(pkg_share, 'urdf', 'robot.urdf.xacro')
-    xacro_file = os.path.join(pkg_share, 'urdf', 'robot_effort.urdf.xacro')
+    xacro_file = os.path.join(pkg_share, 'urdf', 'robot.urdf.xacro')
     world_file = os.path.join(pkg_share, 'worlds', 'model_world.world')
-    rviz_config = os.path.join(pkg_share, 'config', 'view_slam.rviz')
-    #ctrl_yaml = os.path.join(pkg_share, 'config', 'ackermann.yaml')
-    ctrl_yaml = os.path.join(pkg_share, 'config', 'effort.yaml')
+    rviz_config = os.path.join(pkg_share, 'config', 'view_slam_diff.rviz')
+    
+    ctrl_yaml = os.path.join(pkg_share, 'config', 'diff_drive.yaml')
     
     robot_description_config = xacro.process_file(xacro_file, mappings={'config_file': ctrl_yaml})
     robot_description = {'robot_description': robot_description_config.toxml()}
@@ -41,24 +41,17 @@ def generate_launch_description():
     )
 
     load_joint_state_broadcaster = Node(
-        package="controller_manager",
-        executable="spawner",
-        arguments=["joint_state_broadcaster", "--controller-manager", "/controller_manager"],
-        output="screen",
+    package="controller_manager",
+    executable="spawner",
+    arguments=["joint_state_broadcaster"],
+    output="screen",
     )
 
-    load_steering_controller = Node(
-        package="controller_manager",
-        executable="spawner",
-        arguments=["steering_controller", "--controller-manager", "/controller_manager"],
-        output="screen",
-    )
-
-    load_drive_controller = Node(
-        package="controller_manager",
-        executable="spawner",
-        arguments=["drive_controller", "--controller-manager", "/controller_manager"],
-        output="screen",
+    load_diff_drive_controller = Node(
+    package="controller_manager",
+    executable="spawner",
+    arguments=["diff_drive_controller"],
+    output="screen",
     )
 
     load_imu_broadcaster = Node(
@@ -69,21 +62,11 @@ def generate_launch_description():
     )
 
 
-    # Twist Stamper to convert /cmd_vel -> /ackermann.../reference
-    twist_stamper = Node(
-        package='twist_stamper',
-        executable='twist_stamper',
-        parameters=[{'use_sim_time': True}],
-        remappings=[
-            ('cmd_vel_in', '/cmd_vel'),
-            ('cmd_vel_out', '/ackermann_steering_controller/reference')
-        ]
-    )
-
-    torso_stabilizer = Node(
+    
+    state_estimator = Node(
         package='apriltag_slam',
-        executable='torso_stabilizer',
-        name='torso_stabilizer',
+        executable='estimator',
+        name='state_estimator',
         output='screen',
         parameters=[{'tag_size': 0.15}]
     )
@@ -117,12 +100,8 @@ def generate_launch_description():
         node_robot_state_publisher,
         spawn_entity,
         load_joint_state_broadcaster,
-        load_steering_controller,
-        load_drive_controller,
+        load_diff_drive_controller,
         load_imu_broadcaster,
-        #twist_stamper,
-        #torso_stabilizer,
-        #random_tag_mover,
-        # rviz_node,
-        
+        # state_estimator,
+        rviz_node,        
     ])

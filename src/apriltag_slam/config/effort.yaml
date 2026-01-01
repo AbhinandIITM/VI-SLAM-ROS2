@@ -43,11 +43,11 @@ steering_controller:
       stopped_velocity_tolerance: 0.01
       goal_time: 0.6
       front_left_steer_joint:
-        trajectory: 0.05
-        goal: 0.02
+        trajectory: 0.2
+        goal: 0.1
       front_right_steer_joint:
-        trajectory: 0.05
-        goal: 0.02
+        trajectory: 0.2
+        goal: 0.1
 
     gains:
       front_left_steer_joint: {p: 100.0, i: 1.0, d: 5.0, i_clamp: 2.0}
@@ -71,7 +71,11 @@ drive_controller:
     state_interfaces:
       - position
       - velocity
-
+    odom_frame_id: odom
+    base_frame_id: base_footprint
+    publish_rate: 50.0
+    open_loop: true 
+    enable_odom_tf: true 
 # ============================================================================
 # IMU SENSOR BROADCASTER - Publishes /apriltag_slam/imu/data_raw
 # ============================================================================

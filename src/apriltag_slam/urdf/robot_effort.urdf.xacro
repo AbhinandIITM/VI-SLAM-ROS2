@@ -42,15 +42,14 @@
                izz="${m*r*r/2}"/>
     </inertial>
   </xacro:macro>
-
-  <!-- Base Footprint -->
+  
   <link name="base_footprint"/>
   <joint name="base_joint" type="fixed">
     <parent link="base_footprint"/>
     <child link="base_link"/>
     <origin xyz="0 0 ${wheel_radius + base_height/2}" rpy="0 0 0"/>
   </joint>
-
+  
   <!-- Base Link -->
   <link name="base_link">
     <xacro:box_inertia m="${base_mass}" x="${base_length}" y="${base_width}" z="${base_height}"/>
@@ -217,10 +216,29 @@
       <parameters>$(arg config_file)</parameters>
     </plugin>
   </gazebo>
+  
+  <gazebo>
+    <plugin name="gazebo_ros_p3d" filename="libgazebo_ros_p3d.so">
+      <ros>
+        <!-- Ensure the topic name matches your RViz settings -->
+        <remapping>odom:=/apriltag_slam/ground_truth/odom</remapping>
+      </ros>
+      <frame_name>world</frame_name>
+      <body_name>imu_link</body_name>
+      <update_rate>50.0</update_rate>
+      <gaussian_noise>0.01</gaussian_noise>
+      <xyz_offset>0 0 0</xyz_offset>
+      <rpy_offset>0 0 0</rpy_offset>
+      <!-- Sole broadcaster for world -> base_footprint -->
+      <publish_odom_tf>true</publish_odom_tf>
+    </plugin>
+  </gazebo>
+
+
 
   <!-- Camera Sensor -->
   <gazebo reference="camera_link">
-    <sensor name="camera" type="camera">
+    <sensor name="/apriltag_slam/camera" type="camera">
       <always_on>true</always_on>
       <update_rate>30.0</update_rate>
       <camera>
